@@ -1,14 +1,26 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import "./App.css";
+import HomePage from "./pages/Home";
+import ProductsPage from "./pages/Products";
+import RootLayout from "./pages/Root";
+import ErrorPage from "./pages/Error";
+import ProductDetailPage from "./pages/ProductDetail";
 
-import './App.css';
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: "products", element: <ProductsPage /> },
+      { path: "products/:productId", element: <ProductDetailPage /> },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>React router</h1>
-      </header>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
