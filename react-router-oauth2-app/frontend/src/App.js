@@ -12,9 +12,8 @@ import NewEventPage from "./pages/NewEvent";
 import RootLayout from "./pages/Root";
 import { action as manipulateEventAction } from "./components/EventForm";
 import NewsletterPage, { action as newsletterAction } from "./pages/Newsletter";
-import { action as logoutAction } from "./auth/logout";
 import { checkAuthLoader, tokenLoader } from "./auth/auth";
-import RedirectPage, { action as loginAction } from "./pages/Redirect";
+import RedirectPage from "./pages/Redirect";
 
 const router = createBrowserRouter([
   {
@@ -66,10 +65,6 @@ const router = createBrowserRouter([
         action: newsletterAction,
       },
       {
-        path: "login",
-        action: loginAction,
-      },
-      {
         path: "redirect",
         element: <RedirectPage />,
       },
@@ -77,16 +72,14 @@ const router = createBrowserRouter([
         path: "authorized",
         element: <RedirectPage />,
       },
-      {
-        path: "logout",
-        action: logoutAction,
-      },
     ],
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+      <RouterProvider router={router} />
+  );
 }
 
 export default App;

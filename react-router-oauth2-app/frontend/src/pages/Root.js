@@ -1,5 +1,5 @@
 import { Outlet, useLoaderData, useSubmit } from "react-router-dom";
-
+import { AuthProvider } from "../contexts/AuthContext";
 import MainNavigation from "../components/MainNavigation";
 import { useEffect } from "react";
 import { getTokenDuration } from "../auth/auth";
@@ -25,10 +25,12 @@ function RootLayout() {
   }, [token, submit]);
   return (
     <>
-      <MainNavigation />
-      <main>
-        <Outlet />
-      </main>
+      <AuthProvider>
+        <MainNavigation />
+        <main>
+          <Outlet />
+        </main>
+      </AuthProvider>
     </>
   );
 }

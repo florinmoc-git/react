@@ -1,10 +1,12 @@
 import { Form, NavLink, useRouteLoaderData } from "react-router-dom";
-
 import classes from "./MainNavigation.module.css";
 import NewsletterSignup from "./NewsletterSignup";
+import { useAuth } from "../contexts/AuthContext";
 
 function MainNavigation() {
-  const access_token = useRouteLoaderData("root");
+  const { isLoggedIn, logIn, logOut } = useAuth();
+
+
   return (
     <header className={classes.header}>
       <nav>
@@ -40,17 +42,13 @@ function MainNavigation() {
               Newsletter
             </NavLink>
           </li>
-          {!access_token ? (
+          {!isLoggedIn ? (
             <li>
-              <Form action="/login" method="POST">
-                <button>Login</button>
-              </Form>
+              <button onClick={(e) => logIn(e)}>Login</button>
             </li>
           ) : (
             <li>
-              <Form action="/logout" method="POST">
-                <button>Logout</button>
-              </Form>
+              <button onClick={(e) => logOut(e)}>Logout</button>
             </li>
           )}
         </ul>
