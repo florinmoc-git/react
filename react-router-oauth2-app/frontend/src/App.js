@@ -1,5 +1,4 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-
 import EditEventPage from "./pages/EditEvent";
 import ErrorPage from "./pages/Error";
 import EventDetailPage, {
@@ -13,10 +12,9 @@ import NewEventPage from "./pages/NewEvent";
 import RootLayout from "./pages/Root";
 import { action as manipulateEventAction } from "./components/EventForm";
 import NewsletterPage, { action as newsletterAction } from "./pages/Newsletter";
-import {action as loginAction} from "./util/login";
-import {action as logoutAction} from "./pages/Logout"
-import { checkAuthLoader, tokenLoader } from "./util/auth";
-import Redirect from "./pages/Redirect"
+import { action as logoutAction } from "./auth/logout";
+import { checkAuthLoader, tokenLoader } from "./auth/auth";
+import RedirectPage, { action as loginAction } from "./pages/Redirect";
 
 const router = createBrowserRouter([
   {
@@ -58,7 +56,7 @@ const router = createBrowserRouter([
             path: "new",
             element: <NewEventPage />,
             action: manipulateEventAction,
-            loader: checkAuthLoader
+            loader: checkAuthLoader,
           },
         ],
       },
@@ -69,20 +67,20 @@ const router = createBrowserRouter([
       },
       {
         path: "login",
-        action: loginAction
+        action: loginAction,
       },
       {
-        path: 'redirect',
-        element: <Redirect />
+        path: "redirect",
+        element: <RedirectPage />,
       },
       {
-        path: 'authorized',
-        element: <Redirect />
+        path: "authorized",
+        element: <RedirectPage />,
       },
       {
         path: "logout",
-        action: logoutAction
-      }
+        action: logoutAction,
+      },
     ],
   },
 ]);

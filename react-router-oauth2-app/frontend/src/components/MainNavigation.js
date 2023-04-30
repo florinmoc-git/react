@@ -4,7 +4,7 @@ import classes from "./MainNavigation.module.css";
 import NewsletterSignup from "./NewsletterSignup";
 
 function MainNavigation() {
-  const token = useRouteLoaderData("root");
+  const access_token = useRouteLoaderData("root");
   return (
     <header className={classes.header}>
       <nav>
@@ -40,7 +40,7 @@ function MainNavigation() {
               Newsletter
             </NavLink>
           </li>
-          {!token ? (
+          {!access_token ? (
             <li>
               <Form action="/login" method="POST">
                 <button>Login</button>

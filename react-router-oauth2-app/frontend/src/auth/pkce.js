@@ -10,15 +10,14 @@ const base64Url = (str) => {
     .replace(/\//g, "_");
 };
 
-const generateCodeVerifier = () => {
+export const generateCodeVerifier = () => {
   return base64Url(
     crypto.enc.Base64.stringify(crypto.lib.WordArray.random(32))
   );
 };
 
-const generateCodeChallenge = () => {
+export const generateCodeChallenge = () => {
   const codeVerifier = localStorage.getItem("codeVerifier");
   return base64Url(sha256(codeVerifier));
 };
 
-export { base64Url, generateCodeVerifier, generateCodeChallenge };
