@@ -1,6 +1,6 @@
 import { redirect } from "react-router-dom";
 import { Buffer } from "buffer";
-import { tokenURL } from "./URLs";
+import { authorizeWithRefreshTokenURL, tokenURL } from "./URLs";
 
 function jwtDecode(jwtToken) {
   return JSON.parse(
@@ -9,11 +9,11 @@ function jwtDecode(jwtToken) {
 }
 
 export function getTokenDuration() {
-  return localStorage.getItem("expires_in");
+  return localStorage.getItem("expiresIn");
 }
 
 export function getAccessToken() {
-  return localStorage.getItem("access_token");
+  return localStorage.getItem("accessToken");
 }
 
 export function tokenLoader() {
@@ -28,10 +28,29 @@ export function checkAuthLoader() {
   return null;
 }
 
-export function getAccessTokenWithCode(code) {
+export async function getAccessTokenWithCode(code) {
   const client = "client";
   const secret = "secret";
   const url = tokenURL(code);
+
+  const response = await fetch(url, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "Content-type": "application/json",
+      Authorization: `Basic ${Buffer.from(`${client}:${secret}`).toString(
+        "base64"
+      )}`,
+    },
+  });
+  const resp = await response.json();
+  return resp;
+}
+
+export function getAccessTokenWithRefreshToken() {
+  const client = "client";
+  const secret = "secret";
+  const url = authorizeWithRefreshTokenURL();
 
   (async () => {
     try {
@@ -47,10 +66,11 @@ export function getAccessTokenWithCode(code) {
       });
       const resp = await response.json();
       if (resp?.access_token) {
-        localStorage.setItem("access_token", resp.access_token);
-        localStorage.setItem("refresh_token", resp.refresh_token);
-        localStorage.setItem("expires_in", resp.expires_in);
+        localStorage.setItem("accessToken", resp.access_token);
+        localStorage.setItem("refreshToken", resp.refresh_token);
+        localStorage.setItem("expiresIn", resp.expires_in);
       }
+      console.log("Refreshed token....");
     } catch (err) {
       console.error(err);
     }

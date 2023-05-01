@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { generateCodeChallenge, generateCodeVerifier } from "../auth/pkce";
 import { useNavigate } from "react-router-dom";
 import { revokeUrl, clientId, clientSecret } from "../auth/URLs";
+import { getTokenDuration, getAccessTokenWithRefreshToken } from "../auth/auth";
 
 const AuthContext = React.createContext();
 
@@ -11,6 +12,7 @@ export function useAuth() {
 
 export function AuthProvider(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [tokenExpiration, setTokenExpiration] = useState();
   const navigate = useNavigate();
 
   function logIn(e) {
@@ -22,6 +24,7 @@ export function AuthProvider(props) {
 
   function logOut(e) {
     e.preventDefault();
+
     (async () => {
       try {
         await fetch(revokeUrl, {
@@ -31,7 +34,7 @@ export function AuthProvider(props) {
             "Content-type": "application/json",
           },
           body: JSON.stringify({
-            token: localStorage.getItem("refresh_token"),
+            token: localStorage.getItem("refreshToken"),
             client_id: clientId,
             client_secret: clientSecret,
           }),
@@ -48,14 +51,36 @@ export function AuthProvider(props) {
   const value = {
     isLoggedIn,
     setIsLoggedIn,
+    setTokenExpiration,
     logIn,
     logOut,
   };
 
-    useEffect(() => {
-        setIsLoggedIn(localStorage.getItem('isLoggedIn'));
-    }, [])
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("isLoggedIn"));
+  }, []);
 
+
+
+  useEffect(() => {
+    let intervalId;
+    if(isLoggedIn){
+      console.log('Expires in - auth context - storage: ' + localStorage.getItem('expiresIn'))        
+      console.log('Expires in - auth context - state: ' + tokenExpiration)        
+
+      let tokenRefreshingInterval = tokenExpiration * 1000;
+      console.log('Refresh interval outside: ' + tokenRefreshingInterval);
+      intervalId = setInterval(() => {
+        console.log('Refresh interval: ' + tokenRefreshingInterval);
+        console.log("Getting new token....");
+        getAccessTokenWithRefreshToken();
+      }, tokenRefreshingInterval);
+    } else {
+      console.log('Clearing interval......')
+      // clearInterval(intervalId);
+    }
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn, tokenExpiration]);
 
   return (
     <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>

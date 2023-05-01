@@ -2,10 +2,10 @@ import { Form, NavLink, useRouteLoaderData } from "react-router-dom";
 import classes from "./MainNavigation.module.css";
 import NewsletterSignup from "./NewsletterSignup";
 import { useAuth } from "../contexts/AuthContext";
+import { getAccessTokenWithRefreshToken } from "../auth/auth";
 
 function MainNavigation() {
   const { isLoggedIn, logIn, logOut } = useAuth();
-
 
   return (
     <header className={classes.header}>
@@ -51,6 +51,9 @@ function MainNavigation() {
               <button onClick={(e) => logOut(e)}>Logout</button>
             </li>
           )}
+          <li>
+            <button onClick={getAccessTokenWithRefreshToken}>New Token</button>
+          </li>
         </ul>
       </nav>
       <NewsletterSignup />
