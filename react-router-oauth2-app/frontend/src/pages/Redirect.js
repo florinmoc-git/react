@@ -23,7 +23,6 @@ export default function RedirectPage() {
             localStorage.setItem("expiresIn", resp.expires_in);
             localStorage.setItem("isLoggedIn", true);
             setTokenExpiration(resp.expires_in);
-            console.log('Expires in - redirect: ' + localStorage.getItem('expiresIn'))
             setIsLoggedIn(true);
             navigate("/");
           }
@@ -32,11 +31,6 @@ export default function RedirectPage() {
         }
       })();
 
-      // localStorage.setItem('isLoggedIn', true)
-      // setIsLoggedIn(true);
-      // console.log('Expires in - storage: ' + localStorage.getItem('expiresIn'))
-      // setTokenExpiration(localStorage.getItem('expiresIn'));
-      // navigate("/");
     }
   }, [navigate, searchParams]);
 

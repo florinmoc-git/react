@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getAccessTokenWithRefreshToken } from "../auth/auth";
 
 function MainNavigation() {
-  const { isLoggedIn, logIn, logOut } = useAuth();
+  const { isLoggedIn, handleLogin, handleLogout } = useAuth();
 
   return (
     <header className={classes.header}>
@@ -44,11 +44,11 @@ function MainNavigation() {
           </li>
           {!isLoggedIn ? (
             <li>
-              <button onClick={(e) => logIn(e)}>Login</button>
+              <button onClick={handleLogin}>Login</button>
             </li>
           ) : (
             <li>
-              <button onClick={(e) => logOut(e)}>Logout</button>
+              <button onClick={handleLogout}>Logout</button>
             </li>
           )}
           <li>

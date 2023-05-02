@@ -10,21 +10,29 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
+const events = [
+  "load",
+  "mousemove",
+  "mousedown",
+  "click",
+  "scroll",
+  "keypress",
+];
+
 export function AuthProvider(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [tokenExpiration, setTokenExpiration] = useState();
+  const inactivityTimoutLength = 5000; //millis
   const navigate = useNavigate();
 
-  function logIn(e) {
-    e.preventDefault();
+  function handleLogin() {
     localStorage.setItem("codeVerifier", generateCodeVerifier());
     localStorage.setItem("codeChallenge", generateCodeChallenge());
     navigate("/redirect");
   }
 
-  function logOut(e) {
-    e.preventDefault();
-
+  function handleLogout() {
+    setIsLoggedIn(false);
     (async () => {
       try {
         await fetch(revokeUrl, {
@@ -43,44 +51,71 @@ export function AuthProvider(props) {
         console.error(err);
       }
     })();
-
     localStorage.clear();
-    setIsLoggedIn(false);
   }
 
   const value = {
     isLoggedIn,
     setIsLoggedIn,
     setTokenExpiration,
-    logIn,
-    logOut,
+    handleLogin,
+    handleLogout,
   };
 
+  // load login state from storage; for when user reloads page
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("isLoggedIn"));
   }, []);
 
-
-
+  // auto-refresh token
   useEffect(() => {
     let intervalId;
-    if(isLoggedIn){
-      console.log('Expires in - auth context - storage: ' + localStorage.getItem('expiresIn'))        
-      console.log('Expires in - auth context - state: ' + tokenExpiration)        
-
+    if (isLoggedIn) {
       let tokenRefreshingInterval = tokenExpiration * 1000;
-      console.log('Refresh interval outside: ' + tokenRefreshingInterval);
       intervalId = setInterval(() => {
-        console.log('Refresh interval: ' + tokenRefreshingInterval);
-        console.log("Getting new token....");
         getAccessTokenWithRefreshToken();
       }, tokenRefreshingInterval);
-    } else {
-      console.log('Clearing interval......')
-      // clearInterval(intervalId);
     }
     return () => clearInterval(intervalId);
   }, [isLoggedIn, tokenExpiration]);
+
+  // auto-logout on inactivity
+  function checkForInactivity() {
+    const expireTime = localStorage.getItem("expireTime");
+    if (expireTime < Date.now()) {
+      console.log("Logging out...");
+      handleLogout();
+    }
+  }
+
+  function updateExpireTime() {
+    const expireTime = Date.now() + inactivityTimoutLength;
+    console.log("Updating expire time to: " + expireTime);
+    localStorage.setItem("expireTime", expireTime);
+  }
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const intervalId = setInterval(() => {
+        checkForInactivity();
+      }, 1000);
+      return () => clearInterval(intervalId);
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      updateExpireTime();
+      Object.values(events).forEach((event) => {
+        window.addEventListener(event, updateExpireTime);
+      });
+      return () => {
+        Object.values(events).forEach((event) => {
+          window.removeEventListener(event, updateExpireTime);
+        });
+      };
+    }
+  }, [isLoggedIn]);
 
   return (
     <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>
