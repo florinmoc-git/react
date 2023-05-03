@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getAccessTokenWithRefreshToken } from "../auth/auth";
 
 function MainNavigation() {
-  const { isLoggedIn, handleLogin, handleLogout } = useAuth();
+  const { isLoggedIn, handleLogout } = useAuth();
 
   return (
     <header className={classes.header}>
@@ -42,11 +42,7 @@ function MainNavigation() {
               Newsletter
             </NavLink>
           </li>
-          {!isLoggedIn ? (
-            <li>
-              <button onClick={handleLogin}>Login</button>
-            </li>
-          ) : (
+          {isLoggedIn && (
             <li>
               <button onClick={handleLogout}>Logout</button>
             </li>

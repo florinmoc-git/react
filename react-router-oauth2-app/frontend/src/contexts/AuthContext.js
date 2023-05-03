@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import { generateCodeChallenge, generateCodeVerifier } from "../auth/pkce";
-import { useNavigate } from "react-router-dom";
 import { revokeUrl, clientId, clientSecret } from "../auth/URLs";
 import { getAccessTokenWithRefreshToken } from "../auth/auth";
 
@@ -24,13 +22,7 @@ export function AuthProvider(props) {
   const [tokenExpiration, setTokenExpiration] = useState();
   const inactivityTimoutLength = 5000; //millis
   const inactivityCheckLength = 1000; //millis
-  const navigate = useNavigate();
 
-  function handleLogin() {
-    localStorage.setItem("codeVerifier", generateCodeVerifier());
-    localStorage.setItem("codeChallenge", generateCodeChallenge());
-    navigate("/redirect");
-  }
 
   function handleLogout() {
     setIsLoggedIn(false);
@@ -118,7 +110,6 @@ export function AuthProvider(props) {
         isLoggedIn,
         setIsLoggedIn,
         setTokenExpiration,
-        handleLogin,
         handleLogout,
       }}
     >
