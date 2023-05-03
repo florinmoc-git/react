@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { generateCodeChallenge, generateCodeVerifier } from "../auth/pkce";
 import { useNavigate } from "react-router-dom";
 import { revokeUrl, clientId, clientSecret } from "../auth/URLs";
-import { getTokenDuration, getAccessTokenWithRefreshToken } from "../auth/auth";
+import { getAccessTokenWithRefreshToken } from "../auth/auth";
 
 const AuthContext = React.createContext();
 
@@ -23,6 +23,7 @@ export function AuthProvider(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [tokenExpiration, setTokenExpiration] = useState();
   const inactivityTimoutLength = 5000; //millis
+  const inactivityCheckLength = 1000; //millis
   const navigate = useNavigate();
 
   function handleLogin() {
@@ -54,33 +55,8 @@ export function AuthProvider(props) {
     localStorage.clear();
   }
 
-  const value = {
-    isLoggedIn,
-    setIsLoggedIn,
-    setTokenExpiration,
-    handleLogin,
-    handleLogout,
-  };
-
-  // load login state from storage; for when user reloads page
-  useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("isLoggedIn"));
-  }, []);
-
-  // auto-refresh token
-  useEffect(() => {
-    let intervalId;
-    if (isLoggedIn) {
-      let tokenRefreshingInterval = tokenExpiration * 1000;
-      intervalId = setInterval(() => {
-        getAccessTokenWithRefreshToken();
-      }, tokenRefreshingInterval);
-    }
-    return () => clearInterval(intervalId);
-  }, [isLoggedIn, tokenExpiration]);
-
   // auto-logout on inactivity
-  function checkForInactivity() {
+  function autoLogoutIfInactive() {
     const expireTime = localStorage.getItem("expireTime");
     if (expireTime < Date.now()) {
       console.log("Logging out...");
@@ -94,15 +70,34 @@ export function AuthProvider(props) {
     localStorage.setItem("expireTime", expireTime);
   }
 
+  // load login state from storage; for when user reloads page
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("isLoggedIn"));
+  }, []);
+
+  // auto-refresh token when it expires
+  useEffect(() => {
+    let intervalId;
+    if (isLoggedIn) {
+      let tokenRefreshingInterval = tokenExpiration * 1000;
+      intervalId = setInterval(() => {
+        getAccessTokenWithRefreshToken();
+      }, tokenRefreshingInterval);
+    }
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn, tokenExpiration]);
+
+  // check if user has been inactive
   useEffect(() => {
     if (isLoggedIn) {
       const intervalId = setInterval(() => {
-        checkForInactivity();
-      }, 1000);
+        autoLogoutIfInactive();
+      }, inactivityCheckLength);
       return () => clearInterval(intervalId);
     }
   }, [isLoggedIn]);
 
+  // add/remove window listeners
   useEffect(() => {
     if (isLoggedIn) {
       updateExpireTime();
@@ -118,6 +113,16 @@ export function AuthProvider(props) {
   }, [isLoggedIn]);
 
   return (
-    <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        setIsLoggedIn,
+        setTokenExpiration,
+        handleLogin,
+        handleLogout,
+      }}
+    >
+      {props.children}
+    </AuthContext.Provider>
   );
 }

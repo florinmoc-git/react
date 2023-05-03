@@ -51,9 +51,6 @@ function MainNavigation() {
               <button onClick={handleLogout}>Logout</button>
             </li>
           )}
-          <li>
-            <button onClick={getAccessTokenWithRefreshToken}>New Token</button>
-          </li>
         </ul>
       </nav>
       <NewsletterSignup />

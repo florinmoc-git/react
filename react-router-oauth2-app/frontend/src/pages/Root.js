@@ -4,16 +4,14 @@ import MainNavigation from "../components/MainNavigation";
 
 
 function RootLayout() {
-
+  
   return (
-    <>
       <AuthProvider>
         <MainNavigation />
         <main>
           <Outlet />
         </main>
       </AuthProvider>
-    </>
   );
 }
 

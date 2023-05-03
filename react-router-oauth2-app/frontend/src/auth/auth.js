@@ -2,11 +2,11 @@ import { redirect } from "react-router-dom";
 import { Buffer } from "buffer";
 import { authorizeWithRefreshTokenURL, tokenURL } from "./URLs";
 
-function jwtDecode(jwtToken) {
-  return JSON.parse(
-    Buffer.from(jwtToken.split(".")[1], "base64").toString("binary")
-  );
-}
+// function jwtDecode(jwtToken) {
+//   return JSON.parse(
+//     Buffer.from(jwtToken.split(".")[1], "base64").toString("binary")
+//   );
+// }
 
 export function getTokenDuration() {
   return localStorage.getItem("expiresIn");
@@ -14,10 +14,6 @@ export function getTokenDuration() {
 
 export function getAccessToken() {
   return localStorage.getItem("accessToken");
-}
-
-export function tokenLoader() {
-  return getAccessToken();
 }
 
 export function checkAuthLoader() {
